@@ -1,27 +1,38 @@
-#pragma once
 #pragma comment(lib, "winmm.lib")
 
 #ifndef __GENERATOR__
 #define __GENERATOR__
+
 #define _USE_MATH_DEFINES true
 
 #include <functional>
-#include <math.h>
-#include <stdio.h>
-#include <tchar.h>
+#include <cmath>
 
 #include <windows.h>
 #include <mmreg.h>
 #include <complex>
 
-namespace Tlahtolli {
+namespace tlahtolli {
+    enum ChannelKind {
+        Mono,
+        Stereo
+    };
+
     class Juum {
     public:
-        float Pure(float seconds, unsigned short channel, void *context);
-        float Triangle(float seconds, unsigned short channel, void *context);
-        float Sine(float seconds, unsigned short channel, void *context);
-        MMRESULT Play(float seconds, std::function<float (float, unsigned short, void*)> signal, void *context = NULL, unsigned long sps = 44100);
+        Juum(int samplesPerSecond = 44100);
+        ~Juum();
+
+        void play(float ms, std::function<float(float, void*)> signal, tlahtolli::ChannelKind, void* context = NULL);
+
+        float sine(float seconds, void *context);
+        float square(float seconds, void *context);
+        float triangle(float seconds, void *context);
+        float sawtooth(float seconds, void *context);
     private:
+        unsigned int samplesPerSecond;
+
+        MMRESULT play(WAVEFORMATEX wave, float ms, float* buffer, const size_t bufferSize);
     };
 }
 
