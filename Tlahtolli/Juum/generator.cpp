@@ -1,7 +1,8 @@
 #include "generator.h"
 
-tlahtolli::Juum::Juum(int samplesPerSecond)
+tlahtolli::Juum::Juum(float (*signal)(float, float), int samplesPerSecond)
 {
+    this->signal = *signal;
     this->samplesPerSecond = samplesPerSecond;
 }
 
@@ -9,38 +10,42 @@ tlahtolli::Juum::~Juum()
 {
 }
 
-float tlahtolli::Juum::sine(float seconds, void * context)
+float tlahtolli::sine(float seconds, const float frequency)
 {
     return 0.0f;
 }
 
-float tlahtolli::Juum::square(float seconds, void * context)
+float tlahtolli::square(float seconds, const float frequency)
 {
     return 0.0f;
 }
 
-float tlahtolli::Juum::triangle(float seconds, void * context)
+float tlahtolli::triangle(float seconds, const float frequency)
 {
-    const float frequency = *(const float*)context;
     const float angle = (float)(frequency * 2 * M_PI * seconds);
     return (float)asin(sin(angle)) * 2 / M_PI;
 }
 
-float tlahtolli::Juum::sawtooth(float seconds, void * context)
+float tlahtolli::sawtooth(float seconds, const float frequency)
 {
     return 0.0f;
 }
 
-void tlahtolli::Juum::play(float ms, std::function<float (float, void*)> signal, ChannelKind channel, void *context)
+void tlahtolli::Juum::setSamplesPerSecond(int samplesPerSecond)
+{
+    this->samplesPerSecond = samplesPerSecond;
+}
+
+void tlahtolli::Juum::play(ChannelKind channel, float ms, float frequency)
 {
     float secs = (float)(ms / 1000.0f);
     const size_t bufferSize =
         (size_t)(secs * channel * this->samplesPerSecond);
-    float *buffer = (float *)calloc(bufferSize, sizeof(*buffer));
+    float *buffer = (float*)calloc(bufferSize, sizeof(*buffer));
 
     for (size_t i = 0; i < bufferSize; i += channel)
         for (unsigned short j = 0; j < channel; j++)
-            buffer[i + j] = signal((i + j) * secs / bufferSize, context);
+            buffer[i + j] = this->signal((i + j) * secs / bufferSize, frequency);
 
     WORD bitsPerSample = CHAR_BIT * sizeof(buffer[0]);
     WAVEFORMATEX wave = {
