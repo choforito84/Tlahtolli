@@ -14,24 +14,24 @@
 
 namespace tlahtolli {
     enum ChannelKind {
-        Mono,
-        Stereo
+        Mono = 1,
+        Stereo = 2
     };
+
+    float sine(float seconds, const float frequency);
+    float square(float seconds, const float frequency);
+    float triangle(float seconds, const float frequency);
+    float sawtooth(float seconds, const float frequency);
 
     class Juum {
     public:
-        Juum(int samplesPerSecond = 44100);
+        Juum(float (*signal)(float, float), int samplesPerSecond = 44100);
         ~Juum();
-
-        void play(float ms, std::function<float(float, void*)> signal, tlahtolli::ChannelKind, void* context = NULL);
-
-        float sine(float seconds, void *context);
-        float square(float seconds, void *context);
-        float triangle(float seconds, void *context);
-        float sawtooth(float seconds, void *context);
+        void setSamplesPerSecond(int samplesPerSecond);
+        void play(tlahtolli::ChannelKind, float ms, float frequency);
     private:
         unsigned int samplesPerSecond;
-
+        std::function<float(float, const float)> signal;
         MMRESULT play(WAVEFORMATEX wave, float ms, float* buffer, const size_t bufferSize);
     };
 }
