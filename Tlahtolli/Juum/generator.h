@@ -40,7 +40,7 @@ namespace tlahtolli {
         ~Juum();
         void setSamplesPerSecond(int samplesPerSecond);
         #ifdef __linux__ 
-            void playLinux(float duration, float frequency);
+            void play(float duration, float frequency);
         #elif _WIN32
             void play(tlahtolli::ChannelKind, float ms, float frequency);
         #endif

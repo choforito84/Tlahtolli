@@ -41,7 +41,7 @@ void tlahtolli::Juum::setSamplesPerSecond(int samplesPerSecond)
 }
 #ifdef __linux__ 
 
-void tlahtolli::Juum::playLinux(float duration, float frequency){
+void tlahtolli::Juum::play(float duration, float frequency){
 
     
         int rc;
