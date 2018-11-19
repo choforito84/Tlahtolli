@@ -11,12 +11,16 @@ tlahtolli::Juum::~Juum()
 
 float tlahtolli::Juum::sine(float seconds, void * context)
 {
-    return 0.0f;
+    const float frequency = *(const float*)context;
+    const float angle =  (float)(frequency * 2 * M_PI * seconds);
+    return sin(angle);
 }
 
 float tlahtolli::Juum::square(float seconds, void * context)
 {
-    return 0.0f;
+    const float frequency = *(const float*)context;
+    const float angle =  (float)(frequency * 2 * M_PI *seconds);
+    return (float) std::copysign(1.0,sin(angle));
 }
 
 float tlahtolli::Juum::triangle(float seconds, void * context)
