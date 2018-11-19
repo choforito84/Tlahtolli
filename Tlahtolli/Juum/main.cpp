@@ -3,7 +3,7 @@
 using namespace tlahtolli;
 
 int main(int argc, char* argv[]) {
-    Juum j(square);
-    j.playLinux( 5000.0f, 440.0f);
+    Juum j(triangle);
+    j.playLinux( 1000.0f, 440.0f);
     return 0;
 }

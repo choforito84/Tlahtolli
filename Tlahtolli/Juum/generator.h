@@ -39,12 +39,17 @@ namespace tlahtolli {
         Juum(float (*signal)(float, float), int samplesPerSecond = 44100);
         ~Juum();
         void setSamplesPerSecond(int samplesPerSecond);
-        void play(tlahtolli::ChannelKind, float ms, float frequency);
-        void playLinux(float duration, float frequency);
+        #ifdef __linux__ 
+            void playLinux(float duration, float frequency);
+        #elif _WIN32
+            void play(tlahtolli::ChannelKind, float ms, float frequency);
+        #endif
     private:
         unsigned int samplesPerSecond;
         std::function<float(float, const float)> signal;
-        //MMRESULT play(WAVEFORMATEX wave, float ms, float* buffer, const size_t bufferSize); 
+        #ifdef _WIN32
+            MMRESULT play(WAVEFORMATEX wave, float ms, float* buffer, const size_t bufferSize);
+        #endif 
     };
 }
 
