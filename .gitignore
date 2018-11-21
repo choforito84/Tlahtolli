@@ -328,7 +328,3 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
-
-# auxiliary file for debugging purposes
-Tlahtolli/Juum/sandbox.cpp
-*.out
