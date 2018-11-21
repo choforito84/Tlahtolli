@@ -7,7 +7,7 @@
 
 #include <functional>
 #include <cmath>
-
+#include <stdio.h>
 
 #ifdef __linux__ 
     /* Use the newer ALSA API */

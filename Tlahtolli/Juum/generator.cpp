@@ -41,67 +41,42 @@ void tlahtolli::Juum::setSamplesPerSecond(int samplesPerSecond)
 }
 #ifdef __linux__ 
 
-void tlahtolli::Juum::play(float duration, float frequency){
-
-    
+    void tlahtolli::Juum::play(float duration, float frequency)
+    {
+        //ALSA parameters using standard name convention
         int rc;
         snd_pcm_t *handle;
         snd_pcm_hw_params_t *params;
         unsigned int val;
         snd_pcm_uframes_t frames;
         int dir;
-        #define BUFFER_LEN 44100
-        float fs = 44.1;
-        int len=fs*duration;
+        float sampleTime = 44.1;
+        int len=sampleTime*duration;
         float buffer[len];
-        
-
         for (int k=0; k<len; k++) {
-            buffer[k] = this->signal(k/(fs*1000.0),frequency);   
+            buffer[k] = this->signal(k/(sampleTime*1000.0),frequency);   
         }
-        rc = snd_pcm_open(&handle, "default", 
-                        SND_PCM_STREAM_PLAYBACK, 0);
+        rc = snd_pcm_open(&handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
         if (rc < 0) {
-        fprintf(stderr, 
-                "unable to open pcm device: %s\n",
-                snd_strerror(rc));
-        exit(1);
-        }
-
-        /* Allocate a hardware parameters object. */
-        snd_pcm_hw_params_alloca(&params);
-
-        /* Fill it in with default values. */
-        snd_pcm_hw_params_any(handle, params);
-
-        /* Set the desired hardware parameters. */
-
-        /* Interleaved mode */
-        snd_pcm_hw_params_set_access(handle, params,
-                            SND_PCM_ACCESS_RW_INTERLEAVED);
-
-        /* Float format */
-        snd_pcm_hw_params_set_format(handle, params,
-                                    SND_PCM_FORMAT_FLOAT);
-
-        /* Setting channels */
-        snd_pcm_hw_params_set_channels(handle, params, 1);
-
-        /* 44100 bits/second sampling rate (CD quality) */
-        val = 44100;
-        snd_pcm_hw_params_set_rate_near(handle, params, 
-                                        &val, &dir);
-        /* Write the parameters to the driver */
-        rc = snd_pcm_hw_params(handle, params);
-        if (rc < 0) {
-            fprintf(stderr, 
-                    "unable to set hw parameters: %s\n",
-                    snd_strerror(rc));
+            fprintf(stderr, "unable to open pcm device: %s\n", snd_strerror(rc));
             exit(1);
         }
-        /* Putting buffer in frames */
-        frames = snd_pcm_writei(handle, buffer, len);
-        /* freeing memory */
+        // setting parameters
+        snd_pcm_hw_params_alloca(&params);
+        snd_pcm_hw_params_any(handle, params);
+        snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+        snd_pcm_hw_params_set_format(handle, params,SND_PCM_FORMAT_FLOAT);
+        snd_pcm_hw_params_set_channels(handle, params, 1);
+        val = 44100;
+        snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);
+        rc = snd_pcm_hw_params(handle, params);
+        if (rc < 0) {
+            fprintf(stderr, "unable to set hw parameters: %s\n",snd_strerror(rc));
+            exit(1);
+        }
+        //send buffer to hardware device
+        rc = snd_pcm_writei(handle, buffer, len);
+        //free resources
         snd_pcm_drain(handle);
         snd_pcm_close(handle);
         free(buffer);

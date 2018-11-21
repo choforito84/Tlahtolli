@@ -329,6 +329,6 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
-#git ignore for auxiliary file
+# auxiliary file for debugging purposes
 Tlahtolli/Juum/sandbox.cpp
 *.out
