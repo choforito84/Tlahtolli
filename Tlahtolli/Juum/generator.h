@@ -7,10 +7,21 @@
 
 #include <functional>
 #include <cmath>
+#include <stdio.h>
 
-#include <windows.h>
-#include <mmreg.h>
+#ifdef __linux__ 
+    /* Use the newer ALSA API */
+    #define ALSA_PCM_NEW_HW_PARAMS_API
+    #include <alsa/asoundlib.h>
+#elif _WIN32
+    //windows audio API
+    #include <windows.h>
+    #include <mmreg.h>
+#endif
+
 #include <complex>
+
+
 
 namespace tlahtolli {
     enum ChannelKind {
@@ -28,11 +39,17 @@ namespace tlahtolli {
         Juum(float (*signal)(float, float), int samplesPerSecond = 44100);
         ~Juum();
         void setSamplesPerSecond(int samplesPerSecond);
-        void play(tlahtolli::ChannelKind, float ms, float frequency);
+        #ifdef __linux__ 
+            void play(float duration, float frequency);
+        #elif _WIN32
+            void play(tlahtolli::ChannelKind, float ms, float frequency);
+        #endif
     private:
         unsigned int samplesPerSecond;
         std::function<float(float, const float)> signal;
-        MMRESULT play(WAVEFORMATEX wave, float ms, float* buffer, const size_t bufferSize);
+        #ifdef _WIN32
+            MMRESULT play(WAVEFORMATEX wave, float ms, float* buffer, const size_t bufferSize);
+        #endif 
     };
 }
 
