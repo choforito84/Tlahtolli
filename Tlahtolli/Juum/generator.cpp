@@ -41,7 +41,7 @@ void tlahtolli::Juum::setSamplesPerSecond(int samplesPerSecond)
 }
 #ifdef __linux__ 
 
-    void tlahtolli::Juum::play(float duration, float frequency)
+    void tlahtolli::Juum::play(ChannelKind channel , float duration, float frequency)
     {
         //ALSA parameters using standard name convention
         int rc;
@@ -51,10 +51,12 @@ void tlahtolli::Juum::setSamplesPerSecond(int samplesPerSecond)
         snd_pcm_uframes_t frames;
         int dir;
         float sampleTime = 44.1;
-        int len=sampleTime*duration;
+        int len=sampleTime*duration*channel;
         float buffer[len];
-        for (int k=0; k<len; k++) {
-            buffer[k] = this->signal(k/(sampleTime*1000.0),frequency);   
+        for (int k=0; k<len/channel; k++) {
+            for (int c=0; c<channel; c++){
+                buffer[channel*k+c] = this->signal(k/(sampleTime*1000.0),frequency);
+            }
         }
         rc = snd_pcm_open(&handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
         if (rc < 0) {
@@ -66,16 +68,18 @@ void tlahtolli::Juum::setSamplesPerSecond(int samplesPerSecond)
         snd_pcm_hw_params_any(handle, params);
         snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
         snd_pcm_hw_params_set_format(handle, params,SND_PCM_FORMAT_FLOAT);
-        snd_pcm_hw_params_set_channels(handle, params, 1);
+        snd_pcm_hw_params_set_channels(handle, params, channel);
         val = 44100;
         snd_pcm_hw_params_set_rate_near(handle, params, &val, &dir);
+        frames = 32;
+        snd_pcm_hw_params_set_period_size_near(handle, params, &frames, &dir);
         rc = snd_pcm_hw_params(handle, params);
         if (rc < 0) {
             fprintf(stderr, "unable to set hw parameters: %s\n",snd_strerror(rc));
             exit(1);
         }
         //send buffer to hardware device
-        rc = snd_pcm_writei(handle, buffer, len);
+        rc = snd_pcm_writei(handle,buffer, len);
         //free resources
         snd_pcm_drain(handle);
         snd_pcm_close(handle);
